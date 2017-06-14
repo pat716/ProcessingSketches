@@ -2,96 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="262c2f0c-4857-4d92-be94-56f3f97d3655" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/libraries/core.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/libraries/minim.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/datatypes/geom/Vector.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/datatypes/geom/container/twodimensional/ContainerObject2D.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/datatypes/geom/container/twodimensional/RectangleContainer2D.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/datatypes/geom/container/twodimensional/TriangleContainer2D.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/datatypes/geom/linear/threedimensional/Line3D.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/datatypes/geom/linear/threedimensional/LinearObject3D.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/datatypes/geom/linear/twodimensional/Line2D.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/datatypes/geom/linear/twodimensional/LineSegment2D.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/datatypes/geom/linear/twodimensional/LinearObject2D.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/datatypes/shape/Ellipse.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/datatypes/shape/MovingShape.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/datatypes/shape/Shape.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/display/Color.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/display/ColorSpectrum.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/display/DisplayString.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/display/DisplayStringColumn.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/display/DrawOptions.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/display/KeyValueDisplayString.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/model/AudioBlurSketchDataModel.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/model/SketchDataModel.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/sketch/AudioBlurSketch.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/sketch/Sketch.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/special/audioblur/AudioBlurDisplayString.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/special/audioblur/FFTHelper.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/special/audioblur/SoundBall.java" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/controller/PhysicsController.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/controller/ShadowTestController.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/controller/WaterController.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/datatypes/pixel/Color.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/datatypes/pixel/CustomPixel.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/datatypes/pixel/physics/PhysicsManager.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/datatypes/pixel/physics/PhysicsPixel.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/datatypes/pixel/physics/PhysicsPixelFactory.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/datatypes/pixel/physics/TemperatureObject.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/datatypes/pixel/physics/dynamic/AshPixel.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/datatypes/pixel/physics/dynamic/CO2GasPixel.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/datatypes/pixel/physics/dynamic/DynamicPixel.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/datatypes/pixel/physics/dynamic/FirePixel.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/datatypes/pixel/physics/dynamic/GunpowderPixel.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/datatypes/pixel/physics/dynamic/LavaPixel.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/datatypes/pixel/physics/dynamic/SteamPixel.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/datatypes/pixel/physics/dynamic/UraniumPixel.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/datatypes/pixel/physics/dynamic/WaterPixel.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/datatypes/pixel/physics/fixed/CO2SolidPixel.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/datatypes/pixel/physics/fixed/ClonePixel.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/datatypes/pixel/physics/fixed/FusePixel.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/datatypes/pixel/physics/fixed/GrassPixel.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/datatypes/pixel/physics/fixed/IcePixel.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/datatypes/pixel/physics/fixed/MetalPixel.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/datatypes/pixel/physics/fixed/WallPixel.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/datatypes/pr/PMBlackNode.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/datatypes/pr/PMGreyNode.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/datatypes/pr/PMNode.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/datatypes/pr/PMQuadTree.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/datatypes/pr/PMWhiteNode.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/datatypes/pr/Region.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/datatypes/shadow/PolarIntervalMap.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/datatypes/shadow/ShadowMap.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/datatypes/shadow/ShadowRegion.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/datatypes/shadow/obj/ShadowCastLine.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/datatypes/shadow/obj/ShadowCastObject.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/datatypes/shadow/obj/ShadowCastRectangle.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/datatypes/shadow/org/ShadowCastObjectOrganizer.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/datatypes/shadow/org/SimpleShadowCastObjectOrganizer.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/datatypes/water/WaterManager.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/datatypes/water/WaterPolygon.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/datatypes/water/WaterVector.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/datatypes/water/structure/WaterVectorOrganizer.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/datatypes/water/structure/waterpr/WaterVectorBlackNode.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/datatypes/water/structure/waterpr/WaterVectorGreyNode.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/datatypes/water/structure/waterpr/WaterVectorQuadtree.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/datatypes/water/structure/waterpr/WaterVectorQuadtreeNode.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/datatypes/water/structure/waterpr/WaterVectorWhiteNode.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/drawing/Circle2D.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/drawing/Line2D.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/drawing/Shape2D.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/math/Line.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/math/Vector.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/physics/BounceBall2D.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/physics/CompoundMotionPath.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/physics/MotionPath.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/physics/PhysicsObject2D.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/physics/SimpleMotionPath.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/sketches/FallingSand.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/sketches/ShadowTesting.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/sketches/TestSketch.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/sketches/WaterSketch.java" afterPath="" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/controller/SketchController.java" afterPath="$PROJECT_DIR$/src/controller/SketchController.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/libraries/core.xml" afterPath="$PROJECT_DIR$/.idea/libraries/core.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/libraries/minim.xml" afterPath="$PROJECT_DIR$/.idea/libraries/minim.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="ProcessingSketches.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -120,9 +33,8 @@
         <entry file="file://$PROJECT_DIR$/src/model/AudioBlurSketchDataModel.java">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="180">
-              <caret line="82" column="40" lean-forward="false" selection-start-line="82" selection-start-column="40" selection-end-line="82" selection-end-column="40" />
+              <caret line="12" column="21" lean-forward="false" selection-start-line="12" selection-start-column="21" selection-end-line="12" selection-end-column="21" />
               <folding>
-                <element signature="imports" expanded="true" />
                 <element signature="e#5326#5327#0" expanded="true" />
                 <element signature="e#5355#5356#0" expanded="true" />
                 <element signature="e#5391#5392#0" expanded="true" />
@@ -148,7 +60,7 @@
         <entry file="file://$PROJECT_DIR$/src/special/audioblur/SoundBall.java">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="256">
-              <caret line="91" column="63" lean-forward="true" selection-start-line="91" selection-start-column="63" selection-end-line="91" selection-end-column="63" />
+              <caret line="91" column="63" lean-forward="false" selection-start-line="91" selection-start-column="63" selection-end-line="91" selection-end-column="63" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -160,7 +72,7 @@
         <entry file="file://$PROJECT_DIR$/src/special/audioblur/FFTHelper.java">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="54">
-              <caret line="34" column="5" lean-forward="true" selection-start-line="34" selection-start-column="5" selection-end-line="34" selection-end-column="5" />
+              <caret line="34" column="5" lean-forward="false" selection-start-line="34" selection-start-column="5" selection-end-line="34" selection-end-column="5" />
               <folding>
                 <element signature="imports" expanded="true" />
                 <element signature="e#1117#1118#0" expanded="true" />
@@ -200,7 +112,7 @@
         <entry file="file://$PROJECT_DIR$/src/sketch/AudioBlurSketch.java">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="199">
-              <caret line="103" column="78" lean-forward="true" selection-start-line="103" selection-start-column="78" selection-end-line="103" selection-end-column="78" />
+              <caret line="103" column="78" lean-forward="false" selection-start-line="103" selection-start-column="78" selection-end-line="103" selection-end-column="78" />
               <folding>
                 <element signature="imports" expanded="true" />
                 <element signature="e#930#931#0" expanded="true" />
@@ -1220,7 +1132,7 @@
     <entry file="file://$PROJECT_DIR$/src/sketch/AudioBlurSketch.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="199">
-          <caret line="103" column="78" lean-forward="true" selection-start-line="103" selection-start-column="78" selection-end-line="103" selection-end-column="78" />
+          <caret line="103" column="78" lean-forward="false" selection-start-line="103" selection-start-column="78" selection-end-line="103" selection-end-column="78" />
           <folding>
             <element signature="imports" expanded="true" />
             <element signature="e#930#931#0" expanded="true" />
@@ -1240,7 +1152,7 @@
     <entry file="file://$PROJECT_DIR$/src/special/audioblur/SoundBall.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="256">
-          <caret line="91" column="63" lean-forward="true" selection-start-line="91" selection-start-column="63" selection-end-line="91" selection-end-column="63" />
+          <caret line="91" column="63" lean-forward="false" selection-start-line="91" selection-start-column="63" selection-end-line="91" selection-end-column="63" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
@@ -1250,7 +1162,7 @@
     <entry file="file://$PROJECT_DIR$/src/special/audioblur/FFTHelper.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="54">
-          <caret line="34" column="5" lean-forward="true" selection-start-line="34" selection-start-column="5" selection-end-line="34" selection-end-column="5" />
+          <caret line="34" column="5" lean-forward="false" selection-start-line="34" selection-start-column="5" selection-end-line="34" selection-end-column="5" />
           <folding>
             <element signature="imports" expanded="true" />
             <element signature="e#1117#1118#0" expanded="true" />
@@ -1264,9 +1176,8 @@
     <entry file="file://$PROJECT_DIR$/src/model/AudioBlurSketchDataModel.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="180">
-          <caret line="82" column="40" lean-forward="false" selection-start-line="82" selection-start-column="40" selection-end-line="82" selection-end-column="40" />
+          <caret line="12" column="21" lean-forward="false" selection-start-line="12" selection-start-column="21" selection-end-line="12" selection-end-column="21" />
           <folding>
-            <element signature="imports" expanded="true" />
             <element signature="e#5326#5327#0" expanded="true" />
             <element signature="e#5355#5356#0" expanded="true" />
             <element signature="e#5391#5392#0" expanded="true" />

@@ -37,7 +37,7 @@ public class SoundBall {
     private static final float Z_MULTIPLIER = 2f;
 
     public static SoundBall generateRandomSoundBall(FFTHelper fftHelper){
-        int band = (int) (PApplet.sqrt(randomFloat()) * ((float) fftHelper.getNumBands()));
+        int band = (int) (PApplet.pow(randomFloat(), 0.6f) * ((float) fftHelper.getNumBands()));
         return new SoundBall(fftHelper, band);
     }
 
@@ -88,10 +88,10 @@ public class SoundBall {
     public void updateZ() {
         float newZ = minZ +
                 randomFloat(0.99f, 1.01f) * (PApplet.pow(fftHelper.getVolumeMultipliedBand(band)/2, 0.8f) *
-                        (0.25f + 3 * bandRatio/4) * 400)/(PApplet.sqrt(z));
-        vz -= MIN_Z_GRAVITY + Z_GRAVITY_MULTIPLIER * bandRatio;
+                        (0.5f + 2 * bandRatio/4) * 400)/(PApplet.sqrt(z));
+        vz -= MIN_Z_GRAVITY + Z_GRAVITY_MULTIPLIER * (0.5f + bandRatio/2);
         if(newZ > z){
-            float vz_addition = (newZ - z) * VZ_MULTIPLIER * (0.2f + PApplet.pow(2 * bandRatio/4 + 0.75f, 2));
+            float vz_addition = (newZ - z) * VZ_MULTIPLIER * (0.01f + PApplet.pow(2 * bandRatio/4 + 0.5f, 2));
             if(vz + vz_addition < vz_addition){
                 vz = vz_addition;
             } else {
@@ -123,7 +123,7 @@ public class SoundBall {
     public void draw(PGraphics canvas, Color.ColorMode colorMode, MovingShape.MotionDrawMode motionDrawMode){
         float x = getX(), y = getY();
         float travelDist = PApplet.dist(prevX, prevY, x, y);
-        if(travelDist > radius * 4 && fftHelper.getModel().isFastBlurEnabled()){
+        if(travelDist > radius * 3 && fftHelper.getModel().isFastBlurEnabled()){
             canvas.blendMode(NORMAL);
             canvas.stroke(
                     bandColor.multiplyAlpha(

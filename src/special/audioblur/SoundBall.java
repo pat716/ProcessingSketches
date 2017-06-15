@@ -35,6 +35,7 @@ public class SoundBall {
     private static final float MIN_Z_GRAVITY = 1f;
     private static final float Z_GRAVITY_MULTIPLIER = 5f;
     private static final float Z_MULTIPLIER = 2f;
+    private static final float BAND_RATIO_PHYSICS_PERCENTAGE = 0.25f;
 
     public static SoundBall generateRandomSoundBall(FFTHelper fftHelper){
         int band = (int) (PApplet.sqrt(randomFloat()) * ((float) fftHelper.getNumBands()));
@@ -88,10 +89,13 @@ public class SoundBall {
     public void updateZ() {
         float newZ = minZ +
                 randomFloat(0.99f, 1.01f) * (PApplet.pow(fftHelper.getVolumeMultipliedBand(band)/2, 0.8f) *
-                        (0.25f + 3 * bandRatio/4) * 400)/(PApplet.sqrt(z));
-        vz -= MIN_Z_GRAVITY + Z_GRAVITY_MULTIPLIER * bandRatio;
+                        ((1 - BAND_RATIO_PHYSICS_PERCENTAGE) + bandRatio * BAND_RATIO_PHYSICS_PERCENTAGE)
+                        * 400)/(PApplet.sqrt(z));
+        vz -= MIN_Z_GRAVITY + Z_GRAVITY_MULTIPLIER * ((1 - BAND_RATIO_PHYSICS_PERCENTAGE) + bandRatio *
+                BAND_RATIO_PHYSICS_PERCENTAGE);
         if(newZ > z){
-            float vz_addition = (newZ - z) * VZ_MULTIPLIER * (0.2f + PApplet.pow(2 * bandRatio/4 + 0.75f, 2));
+            float vz_addition = (newZ - z) * VZ_MULTIPLIER * (0.2f + PApplet.pow((1 - BAND_RATIO_PHYSICS_PERCENTAGE)
+                    + bandRatio * BAND_RATIO_PHYSICS_PERCENTAGE, 2));
             if(vz + vz_addition < vz_addition){
                 vz = vz_addition;
             } else {

@@ -19,7 +19,7 @@ import java.util.Map;
 public class AudioBlurSketch extends Sketch {
     PGraphics primarySoundballGraphics;
     PGraphics secondarySoundballGraphics;
-    private static int SOUND_BALL_BLEND_MODE = SUBTRACT;
+    private static int SOUND_BALL_BLEND_MODE = NORMAL;
     private boolean whiteMode = false;
     private AudioBlurSketchDataModel abModel;
 
@@ -37,16 +37,12 @@ public class AudioBlurSketch extends Sketch {
 
     public void toggleWhiteMode(){
         whiteMode = !whiteMode;
-        if(whiteMode){
-            SOUND_BALL_BLEND_MODE = NORMAL;
-        } else {
-            SOUND_BALL_BLEND_MODE = LIGHTEST;
-        }
     }
 
     @Override
     public void sketchSettings() {
-        size(800, 600);
+        size(displayWidth, displayHeight);
+        fullScreen();
     }
 
     @Override
@@ -55,9 +51,6 @@ public class AudioBlurSketch extends Sketch {
         setModel(abModel);
         ellipseMode(CENTER);
         rectMode(CENTER);
-
-        if(whiteMode) SOUND_BALL_BLEND_MODE = NORMAL;
-        else SOUND_BALL_BLEND_MODE = LIGHTEST;
 
         primarySoundballGraphics = createGraphics(width, height);
         //primarySoundballGraphics.noSmooth();
@@ -102,7 +95,7 @@ public class AudioBlurSketch extends Sketch {
         }
 
         if(whiteMode) secondarySoundballGraphics.blendMode(PConstants.NORMAL);
-        else secondarySoundballGraphics.blendMode(PConstants.ADD);
+        else secondarySoundballGraphics.blendMode(PConstants.NORMAL);
 
         if(abModel.useVariableAlphaBuffers() && abModel.getPrimarySoundballGraphicsImageAlpha() != 255){
             secondarySoundballGraphics.tint(255, abModel.getPrimarySoundballGraphicsImageAlpha());

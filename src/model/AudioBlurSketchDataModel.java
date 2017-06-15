@@ -87,7 +87,8 @@ public class AudioBlurSketchDataModel extends SketchDataModel {
 
     private boolean useVariableAlphaBuffers = false;
     private boolean paused = false;
-    private boolean fastBlur = true;
+
+    private MovingShape.MotionDrawMode motionDrawMode = MovingShape.MotionDrawMode.FASTEST_BLUR;
 
     public AudioBlurSketchDataModel(SketchController controller, Sketch sketch){
         super(controller, sketch);
@@ -95,13 +96,14 @@ public class AudioBlurSketchDataModel extends SketchDataModel {
         newKeysReleased = new HashSet<>();
         newKeyCodesPressed = new HashSet<>();
         newKeyCodesReleased = new HashSet<>();
+
         minim = new Minim(sketch);
 
         in = minim.getLineIn();
         in.enableMonitoring();
         fft = new FFT(in.bufferSize(), in.sampleRate());
         in.mute();
-        fftHelper = new FFTHelper(fft, this, colorSpectrums.get(spectrumIndex), 0, .5f);
+        fftHelper = new FFTHelper(fft, this, colorSpectrums.get(spectrumIndex), 0, .6f);
 
         soundBalls = new TreeSet<>(new Comparator<SoundBall>() {
             @Override
@@ -128,7 +130,7 @@ public class AudioBlurSketchDataModel extends SketchDataModel {
                 new AudioBlurDisplayString("variable_alpha",
                         new Color(1, 1), 16, this));
         sketch.addDisplayStringToDiagInfoColumn(
-                new AudioBlurDisplayString("fast_blur",
+                new AudioBlurDisplayString("motion_draw_mode",
                         new Color(1, 1), 16, this));
         sketch.addDisplayStringToDiagInfoColumn(
                 new AudioBlurDisplayString("amplitude_cutoff",
@@ -137,6 +139,10 @@ public class AudioBlurSketchDataModel extends SketchDataModel {
 
     public boolean isPaused() {
         return paused;
+    }
+
+    public MovingShape.MotionDrawMode getMotionDrawMode() {
+        return motionDrawMode;
     }
 
     public int getNumSoundballs(){
@@ -161,10 +167,6 @@ public class AudioBlurSketchDataModel extends SketchDataModel {
 
     public boolean useVariableAlphaBuffers() {
         return useVariableAlphaBuffers;
-    }
-
-    public boolean isFastBlurEnabled() {
-        return fastBlur;
     }
 
     @Override
@@ -200,7 +202,7 @@ public class AudioBlurSketchDataModel extends SketchDataModel {
         }
 
         if(newKeysPressed.contains('f') || newKeysPressed.contains('F')){
-            fastBlur = !fastBlur;
+            motionDrawMode = MovingShape.getNextMotionDrawMode(motionDrawMode);
         }
 
         if(newKeysPressed.contains('i') || newKeysPressed.contains('I')){
@@ -260,7 +262,7 @@ public class AudioBlurSketchDataModel extends SketchDataModel {
 
         for(SoundBall soundBall : soundBalls){
             soundBall.update();
-            soundBall.draw(canvas, colorMode, MovingShape.MotionDrawMode.BLUR);
+            soundBall.draw(canvas, colorMode, motionDrawMode);
         }
     }
 }

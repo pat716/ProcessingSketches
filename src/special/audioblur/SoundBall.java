@@ -2,7 +2,7 @@ package special.audioblur;
 
 import datatypes.geom.Vector;
 import datatypes.geom.container.twodimensional.RectangleContainer2D;
-import datatypes.shape.Ellipse;
+import datatypes.shape.Circle;
 import datatypes.shape.MovingShape;
 import display.Color;
 import display.DrawOptions;
@@ -22,33 +22,33 @@ import static sketch.Sketch.randomFloat;
  * Created by psweeney on 6/12/17.
  */
 public class SoundBall {
-    private static final float MIN_BOTTOM_ROTATION_SPEED = PI/1024;
+    private static final float MIN_BOTTOM_ROTATION_SPEED = PI/512;
     private static final float MAX_BOTTOM_ROTATION_SPEED = PI/128;
     private static final float RANDOM_BOTTOM_ROTATION_SPEED_AMOUNT = PI/256;
     private static final float MIN_BOTTOM_Z = 0;
     private static final float MAX_BOTTOM_Z = 50;
     private static final float RANDOM_Z_AMOUNT = 0;
-    private static final float MIN_RADIUS = 1.5f;
-    private static final float MAX_RADIUS = 8;
+    private static final float MIN_RADIUS = 3f;
+    private static final float MAX_RADIUS = 15;
     private static final float RANDOM_RADIUS_AMOUNT = 0.5f;
-    private static final float VZ_MULTIPLIER = .005f;
+    private static final float VZ_MULTIPLIER = .025f;
     private static final float MIN_Z_GRAVITY = 1f;
-    private static final float Z_GRAVITY_MULTIPLIER = 5f;
+    private static final float Z_GRAVITY_MULTIPLIER = 25f;
     private static final float Z_MULTIPLIER = 2f;
-    private static final float BAND_RATIO_PHYSICS_PERCENTAGE = 0.25f;
+    private static final float BAND_RATIO_PHYSICS_PERCENTAGE = 0.4f;
 
     public static SoundBall generateRandomSoundBall(FFTHelper fftHelper){
-        int band = (int) (PApplet.sqrt(randomFloat()) * ((float) fftHelper.getNumBands()));
+        float band = PApplet.pow(randomFloat(), 0.4f) * ((float) fftHelper.getNumBands() - 1);
         return new SoundBall(fftHelper, band);
     }
 
     private FFTHelper fftHelper;
-    private int band;
+    private float band;
     private float bandRatio, bandAmplitudeRatio, radius, rotation, bottomRotationSpeed,
             minZ, z, vz, prevX, prevY, prevZ;
     private Color bandColor;
 
-    public SoundBall(FFTHelper fftHelper, int band){
+    public SoundBall(FFTHelper fftHelper, float band){
         this.fftHelper = fftHelper;
         this.band = band;
         bandRatio = ((float) band) / ((float) fftHelper.getNumBands());
@@ -127,7 +127,8 @@ public class SoundBall {
     public void draw(PGraphics canvas, Color.ColorMode colorMode, MovingShape.MotionDrawMode motionDrawMode){
         float x = getX(), y = getY();
         float travelDist = PApplet.dist(prevX, prevY, x, y);
-        if(travelDist > radius * 4 && fftHelper.getModel().isFastBlurEnabled()){
+        /*
+        if(motionDrawMode == MovingShape.MotionDrawMode.QUALITY_BLUR && travelDist > radius * 4 && fftHelper.getModel().isFastBlurEnabled()){
             canvas.blendMode(NORMAL);
             canvas.stroke(
                     bandColor.multiplyAlpha(
@@ -139,8 +140,8 @@ public class SoundBall {
             float xExtraAmount = ((x - prevX)/travelDist) * radius/2, yExtraAmount = ((y - prevY)/travelDist) * radius/2;
             canvas.line(prevX - xExtraAmount, prevY - yExtraAmount, x + xExtraAmount, y + yExtraAmount);
             return;
-        }
-        Ellipse start = new Ellipse(prevX, prevY, radius, new DrawOptions(
+        } */
+        Circle start = new Circle(prevX, prevY, radius, new DrawOptions(
                 true,
                 false,
                 bandColor,
@@ -148,7 +149,7 @@ public class SoundBall {
                 0,
                 AudioBlurSketch.getSoundBallBlendMode())),
 
-                end = new Ellipse(getX(), getY(), radius, new DrawOptions(
+                end = new Circle(getX(), getY(), radius, new DrawOptions(
                 true,
                 false,
                 bandColor,

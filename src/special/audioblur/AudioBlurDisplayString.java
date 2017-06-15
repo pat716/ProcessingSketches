@@ -34,10 +34,8 @@ public class AudioBlurDisplayString extends DisplayString {
                 if(dataModel.useVariableAlphaBuffers()) retString += "ON";
                 else retString += "OFF";
                 break;
-            case "fast_blur":
-                retString = "Fast motion blur technique: ";
-                if(dataModel.isFastBlurEnabled()) retString += "ON";
-                else retString += "OFF";
+            case "motion_draw_mode":
+                retString = "Motion draw mode: " + dataModel.getMotionDrawMode().toString();
                 break;
             case "amplitude_cutoff":
                 retString = "Amplitude cutoff: " +

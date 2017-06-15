@@ -34,15 +34,17 @@ public class FFTHelper {
         return model;
     }
 
-    public float getBand(int i){
-        return bands.get(i);
+    public float getBand(float i){
+        int lowerBand = PApplet.floor(i), upperBand = PApplet.ceil(i);
+        float upperRatio = i - lowerBand;
+        return bands.get(lowerBand) * (1 - upperRatio) + bands.get(upperBand) * upperRatio;
     }
 
-    public float getVolumeMultipliedBand(int i){
+    public float getVolumeMultipliedBand(float i){
         return getBand(i) * model.getVolumeMultiplier();
     }
 
-    public float getNormalizedBand(int i){
+    public float getNormalizedBand(float i){
         return getBand(i) / maxAmplitude;
     }
 
@@ -54,8 +56,8 @@ public class FFTHelper {
         return maxAmplitude;
     }
 
-    public Color getColorForBand(int band){
-        float ratio = ((float) band) / ((float) bands.size());
+    public Color getColorForBand(float band){
+        float ratio = (band) / ((float) bands.size());
         return colorSpectrum.getColorForFraction(ratio);
     }
 

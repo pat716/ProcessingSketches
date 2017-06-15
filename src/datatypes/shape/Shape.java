@@ -34,6 +34,7 @@ public abstract class Shape {
         render(canvas, xOffset, yOffset);
     }
 
+    public abstract float getStrokeWeightForSimpleRendering();
     public abstract Vector getCenterPoint();
     public abstract Shape clone(DrawOptions drawOptions);
     public abstract Shape clone();

@@ -18,7 +18,7 @@ public class MovingShape {
     }
 
     public static enum MotionDrawMode{
-        START, MIDDLE, END, FASTEST_BLUR, FAST_BLUR, QUALITY_BLUR
+        START, MIDDLE, END, BLUR
     }
 
     public static MotionDrawMode getNextMotionDrawMode(MotionDrawMode drawMode){
@@ -28,12 +28,8 @@ public class MovingShape {
             case MIDDLE:
                 return MotionDrawMode.END;
             case END:
-                return MotionDrawMode.FASTEST_BLUR;
-            case FASTEST_BLUR:
-                return MotionDrawMode.FAST_BLUR;
-            case FAST_BLUR:
-                return MotionDrawMode.QUALITY_BLUR;
-            case QUALITY_BLUR:
+                return MotionDrawMode.BLUR;
+            case BLUR:
                 return MotionDrawMode.START;
         }
         return MotionDrawMode.START;
@@ -63,29 +59,7 @@ public class MovingShape {
             case MIDDLE:
                 start.combine(end, 0.5f).drawShape(canvas, colorMode);
                 break;
-            case FASTEST_BLUR:
-                float strokeWeight = (start.getStrokeWeightForSimpleRendering() +
-                        end.getStrokeWeightForSimpleRendering())/2;
-                Color strokeColor = start.combine(end, 0.5f).getDrawOptions().getFillColor()
-                        .multiplyAlpha(shapeIterationAlphaMultiplier * strokeWeight/2);
-                canvas.stroke(strokeColor.convert(canvas, colorMode));
-                canvas.strokeWeight(strokeWeight);
-                canvas.line(x1, y1, x2, y2);
-                break;
-            case FAST_BLUR:
-                strokeWeight = (start.getStrokeWeightForSimpleRendering() +
-                        end.getStrokeWeightForSimpleRendering())/2;
-                strokeColor = start.combine(end, 0.5f).getDrawOptions().getFillColor();
-                canvas.stroke(strokeColor.multiplyAlpha(
-                        shapeIterationAlphaMultiplier * strokeWeight * 0.5f)
-                        .convert(canvas, colorMode));
-                canvas.strokeWeight(strokeWeight);
-                canvas.line(x1, y1, x2, y2);
-                float xExtraAmount = ((x2 - x1)/distance) * strokeWeight/2,
-                        yExtraAmount = ((y2 - y1)/distance) * strokeWeight/2;
-                canvas.line(x1 - xExtraAmount, y1 - yExtraAmount, x2 + xExtraAmount, y2 + yExtraAmount);
-                break;
-            case QUALITY_BLUR:
+            case BLUR:
                 if(distance < 1){
                     drawMovingShape(canvas, colorMode, MotionDrawMode.START);
                     break;

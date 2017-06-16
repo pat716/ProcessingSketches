@@ -86,9 +86,12 @@ public class AudioBlurSketchDataModel extends SketchDataModel {
     private float secondarySoundballGraphicsClearAlpha = 5;
 
     private boolean useVariableAlphaBuffers = false;
+    private boolean whiteMode = false;
     private boolean paused = false;
+    private boolean fastBlur = true;
+    private boolean bloom = true;
 
-    private MovingShape.MotionDrawMode motionDrawMode = MovingShape.MotionDrawMode.FASTEST_BLUR;
+    private MovingShape.MotionDrawMode motionDrawMode = MovingShape.MotionDrawMode.BLUR;
 
     public AudioBlurSketchDataModel(SketchController controller, Sketch sketch){
         super(controller, sketch);
@@ -133,12 +136,31 @@ public class AudioBlurSketchDataModel extends SketchDataModel {
                 new AudioBlurDisplayString("motion_draw_mode",
                         new Color(1, 1), 16, this));
         sketch.addDisplayStringToDiagInfoColumn(
+                new AudioBlurDisplayString("fast_blur",
+                        new Color(1, 1), 16, this));
+        sketch.addDisplayStringToDiagInfoColumn(
                 new AudioBlurDisplayString("amplitude_cutoff",
                         new Color(1, 1), 16, this));
     }
 
     public boolean isPaused() {
         return paused;
+    }
+
+    public boolean isFastBlurEnabled(){
+        return fastBlur;
+    }
+
+    public boolean isBloomEnabled(){
+        return bloom;
+    }
+
+    public boolean isWhiteModeActivated() {
+        return whiteMode;
+    }
+
+    public void toggleWhiteMode(){
+        whiteMode = !whiteMode;
     }
 
     public MovingShape.MotionDrawMode getMotionDrawMode() {
@@ -193,6 +215,10 @@ public class AudioBlurSketchDataModel extends SketchDataModel {
             useVariableAlphaBuffers = !useVariableAlphaBuffers;
         }
 
+        if(newKeysPressed.contains('b') || newKeysPressed.contains('B')){
+            bloom = !bloom;
+        }
+
         if(newKeysPressed.contains('e') || newKeysPressed.contains('E')){
             for(int i = 0; i < SOUNDBALL_NUM_INC_AMOUNT; i++){
                 SoundBall randomSoundBall = SoundBall.generateRandomSoundBall(fftHelper);
@@ -202,11 +228,15 @@ public class AudioBlurSketchDataModel extends SketchDataModel {
         }
 
         if(newKeysPressed.contains('f') || newKeysPressed.contains('F')){
-            motionDrawMode = MovingShape.getNextMotionDrawMode(motionDrawMode);
+            fastBlur = !fastBlur;
         }
 
         if(newKeysPressed.contains('i') || newKeysPressed.contains('I')){
             getSketch().toggleShowDiagInfo();
+        }
+
+        if(newKeysPressed.contains('m') || newKeysPressed.contains('M')){
+            motionDrawMode = MovingShape.getNextMotionDrawMode(motionDrawMode);
         }
 
         if(newKeysPressed.contains('o') || newKeysPressed.contains('O')){
@@ -228,7 +258,7 @@ public class AudioBlurSketchDataModel extends SketchDataModel {
         }
 
         if(newKeysPressed.contains('w') || newKeysPressed.contains('W')){
-            ((AudioBlurSketch) getSketch()).toggleWhiteMode();
+            toggleWhiteMode();
         }
 
         if(newKeyCodesPressed.contains(UP)){
@@ -255,7 +285,7 @@ public class AudioBlurSketchDataModel extends SketchDataModel {
 
     @Override
     public void applyModelStateToSketch(PGraphics canvas, Color.ColorMode colorMode) {
-        if(((AudioBlurSketch) getSketch()).isWhiteModeActivated()) canvas.background(255, 0);
+        if(whiteMode) canvas.background(255, 0);
         else canvas.background(0, 0);
         fft.forward(in.mix.toArray());
         fftHelper.update();

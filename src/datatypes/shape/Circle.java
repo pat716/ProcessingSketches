@@ -22,11 +22,6 @@ public class Circle extends Shape {
     }
 
     @Override
-    public float getStrokeWeightForSimpleRendering() {
-        return radius * 2;
-    }
-
-    @Override
     public Vector getCenterPoint() {
         return new Vector(x, y);
     }
@@ -34,8 +29,7 @@ public class Circle extends Shape {
     @Override
     protected void render(PGraphics canvas, float xOffset, float yOffset) {
         canvas.ellipseMode(PConstants.CENTER);
-        canvas.ellipse(x + xOffset, y + yOffset, radius * 2, radius * 2);
-
+        canvas.ellipse(x + xOffset, y + yOffset, radius, radius);
     }
 
     @Override

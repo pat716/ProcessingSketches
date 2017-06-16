@@ -38,7 +38,7 @@ public class SoundBall {
     private static final float BAND_RATIO_PHYSICS_PERCENTAGE = 0.4f;
 
     public static SoundBall generateRandomSoundBall(FFTHelper fftHelper){
-        float band = PApplet.pow(randomFloat(), 0.4f) * ((float) fftHelper.getNumBands() - 1);
+        float band = PApplet.pow(randomFloat(), 1f/3f) * ((float) fftHelper.getNumBands() - 1);
         return new SoundBall(fftHelper, band);
     }
 
@@ -52,7 +52,6 @@ public class SoundBall {
         this.fftHelper = fftHelper;
         this.band = band;
         bandRatio = ((float) band) / ((float) fftHelper.getNumBands());
-
 
         bottomRotationSpeed = MIN_BOTTOM_ROTATION_SPEED + randomFloat() * bandRatio * (MAX_BOTTOM_ROTATION_SPEED - MIN_BOTTOM_ROTATION_SPEED);
         bottomRotationSpeed += bandRatio * randomFloat(RANDOM_BOTTOM_ROTATION_SPEED_AMOUNT);
@@ -127,20 +126,19 @@ public class SoundBall {
     public void draw(PGraphics canvas, Color.ColorMode colorMode, MovingShape.MotionDrawMode motionDrawMode){
         float x = getX(), y = getY();
         float travelDist = PApplet.dist(prevX, prevY, x, y);
-        /*
-        if(motionDrawMode == MovingShape.MotionDrawMode.QUALITY_BLUR && travelDist > radius * 4 && fftHelper.getModel().isFastBlurEnabled()){
+        if(motionDrawMode == MovingShape.MotionDrawMode.BLUR && travelDist > radius * 4 && fftHelper.getModel().isFastBlurEnabled()){
             canvas.blendMode(NORMAL);
             canvas.stroke(
                     bandColor.multiplyAlpha(
                             MovingShape.getAlphaMultiplierForDistance(travelDist) * radius
-                    * (0.5f)).convert(canvas, colorMode));
+                    * (0.45f)).convert(canvas, colorMode));
 
             canvas.strokeWeight(radius);
             canvas.line(prevX, prevY, x, y);
             float xExtraAmount = ((x - prevX)/travelDist) * radius/2, yExtraAmount = ((y - prevY)/travelDist) * radius/2;
             canvas.line(prevX - xExtraAmount, prevY - yExtraAmount, x + xExtraAmount, y + yExtraAmount);
             return;
-        } */
+        }
         Circle start = new Circle(prevX, prevY, radius, new DrawOptions(
                 true,
                 false,

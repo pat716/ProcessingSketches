@@ -19,8 +19,12 @@ import java.util.Map;
 public class AudioBlurSketch extends Sketch {
     PGraphics primarySoundballGraphics;
     PGraphics secondarySoundballGraphics;
+    PGraphics tertiarySoundballGraphics;
+    PGraphics bloomGraphics;
+
     private static int SOUND_BALL_BLEND_MODE = NORMAL;
-    private boolean whiteMode = false;
+    private static float bloomGraphicsSizeFactor = 0.25f;
+
     private AudioBlurSketchDataModel abModel;
 
     public static int getSoundBallBlendMode() {
@@ -31,18 +35,12 @@ public class AudioBlurSketch extends Sketch {
         SOUND_BALL_BLEND_MODE = soundBallBlendMode;
     }
 
-    public boolean isWhiteModeActivated() {
-        return whiteMode;
-    }
 
-    public void toggleWhiteMode(){
-        whiteMode = !whiteMode;
-    }
 
     @Override
     public void sketchSettings() {
-        size(displayWidth, displayHeight);
-        fullScreen();
+        size(800, 600);
+        //fullScreen();
     }
 
     @Override
@@ -66,6 +64,19 @@ public class AudioBlurSketch extends Sketch {
         secondarySoundballGraphics.fill(0);
         secondarySoundballGraphics.noStroke();
         secondarySoundballGraphics.endDraw();
+
+        tertiarySoundballGraphics = createGraphics(width, height);
+        tertiarySoundballGraphics.noSmooth();
+        tertiarySoundballGraphics.beginDraw();
+        tertiarySoundballGraphics.background(0);
+        tertiarySoundballGraphics.endDraw();
+
+        bloomGraphics = createGraphics((int) (((float) width) * bloomGraphicsSizeFactor),
+                (int) (((float) height) * bloomGraphicsSizeFactor));
+        bloomGraphics.noSmooth();
+        bloomGraphics.beginDraw();
+        bloomGraphics.background(0, 0);
+        bloomGraphics.endDraw();
     }
 
     private void preparePrimarySoundballGraphics(){
@@ -77,6 +88,7 @@ public class AudioBlurSketch extends Sketch {
     }
 
     private void prepareSecondarySoundballGraphics(){
+        boolean whiteMode = abModel.isWhiteModeActivated();
         if(abModel.isPaused()) return;
         secondarySoundballGraphics.beginDraw();
         secondarySoundballGraphics.imageMode(CENTER);
@@ -109,16 +121,42 @@ public class AudioBlurSketch extends Sketch {
         secondarySoundballGraphics.endDraw();
     }
 
+    private void prepareTertiarySoundballGraphics(){
+        boolean whiteMode = abModel.isWhiteModeActivated();
+        tertiarySoundballGraphics.beginDraw();
+        tertiarySoundballGraphics.blendMode(NORMAL);
+        tertiarySoundballGraphics.background(0, 0);
+        tertiarySoundballGraphics.image(secondarySoundballGraphics.get(), 0, 0, tertiarySoundballGraphics.width, tertiarySoundballGraphics.height);
+        if(!whiteMode && abModel.isBloomEnabled()){
+            bloomGraphics.beginDraw();
+            bloomGraphics.fill(0, 100);
+            bloomGraphics.rect(0, 0, bloomGraphics.width, bloomGraphics.height);
+            //bloomGraphics.background(0, 0);
+            bloomGraphics.image(secondarySoundballGraphics.get(), 0, 0, bloomGraphics.width, bloomGraphics.height);
+            bloomGraphics.endDraw();
+            bloomGraphics.filter(PConstants.BLUR, 4f);
+            tertiarySoundballGraphics.blendMode(ADD);
+            tertiarySoundballGraphics.image(bloomGraphics, 0, 0, width, height);
+        }
+        tertiarySoundballGraphics.endDraw();
+    }
+
     @Override
     public void sketchDraw() {
+        blendMode(NORMAL);
+        boolean whiteMode = abModel.isWhiteModeActivated();
         if(whiteMode) background(255, 255);
         else background(0, 255);
         getModel().applyControllerStateToModel();
 
         preparePrimarySoundballGraphics();
         prepareSecondarySoundballGraphics();
+        prepareTertiarySoundballGraphics();
 
-        image(secondarySoundballGraphics, 0, 0, width, height);
+        image(tertiarySoundballGraphics, 0, 0, width, height);
+
+
+
     }
 
     public static void main(String[] args){

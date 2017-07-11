@@ -22,8 +22,8 @@ public class AudioBlurSketch extends Sketch {
     PGraphics tertiarySoundballGraphics;
     PGraphics bloomGraphics;
 
-    private static int SOUND_BALL_BLEND_MODE = NORMAL;
-    private static float bloomGraphicsSizeFactor = 0.25f;
+    private static int SOUND_BALL_BLEND_MODE = LIGHTEST;
+    private static float bloomGraphicsSizeFactor = 1f;
 
     private AudioBlurSketchDataModel abModel;
 
@@ -35,12 +35,10 @@ public class AudioBlurSketch extends Sketch {
         SOUND_BALL_BLEND_MODE = soundBallBlendMode;
     }
 
-
-
     @Override
     public void sketchSettings() {
-        size(800, 600);
-        //fullScreen();
+        size(1920, 1080);
+        fullScreen();
     }
 
     @Override
@@ -82,7 +80,8 @@ public class AudioBlurSketch extends Sketch {
     private void preparePrimarySoundballGraphics(){
         if(abModel.isPaused()) return;
         primarySoundballGraphics.beginDraw();
-        primarySoundballGraphics.blendMode(PConstants.NORMAL);
+        primarySoundballGraphics.blendMode(SOUND_BALL_BLEND_MODE);
+        //primarySoundballGraphics.blendMode(PConstants.NORMAL);
         getModel().applyModelStateToSketch(primarySoundballGraphics, COLOR_MODE);
         primarySoundballGraphics.endDraw();
     }
@@ -101,13 +100,14 @@ public class AudioBlurSketch extends Sketch {
             } else {
                 secondarySoundballGraphics.fill(0, abModel.getSecondarySoundballGraphicsClearAlpha());
             }
-            secondarySoundballGraphics.blendMode(PConstants.NORMAL);
+            secondarySoundballGraphics.blendMode(SOUND_BALL_BLEND_MODE);
+            //secondarySoundballGraphics.blendMode(PConstants.NORMAL);
             secondarySoundballGraphics.rect(0, 0,
                     secondarySoundballGraphics.width, secondarySoundballGraphics.height);
         }
 
         if(whiteMode) secondarySoundballGraphics.blendMode(PConstants.NORMAL);
-        else secondarySoundballGraphics.blendMode(PConstants.NORMAL);
+        else secondarySoundballGraphics.blendMode(SOUND_BALL_BLEND_MODE);
 
         if(abModel.useVariableAlphaBuffers() && abModel.getPrimarySoundballGraphicsImageAlpha() != 255){
             secondarySoundballGraphics.tint(255, abModel.getPrimarySoundballGraphicsImageAlpha());
@@ -134,29 +134,49 @@ public class AudioBlurSketch extends Sketch {
             //bloomGraphics.background(0, 0);
             bloomGraphics.image(secondarySoundballGraphics.get(), 0, 0, bloomGraphics.width, bloomGraphics.height);
             bloomGraphics.endDraw();
-            bloomGraphics.filter(PConstants.BLUR, 4f);
+            bloomGraphics.filter(PConstants.BLUR, 8f);
             tertiarySoundballGraphics.blendMode(ADD);
             tertiarySoundballGraphics.image(bloomGraphics, 0, 0, width, height);
         }
         tertiarySoundballGraphics.endDraw();
     }
 
+
+
     @Override
     public void sketchDraw() {
-        blendMode(NORMAL);
-        boolean whiteMode = abModel.isWhiteModeActivated();
-        if(whiteMode) background(255, 255);
-        else background(0, 255);
         getModel().applyControllerStateToModel();
+        if(abModel.recordingMode){
+            if(!abModel.recordingFinished){
+                abModel.applyControllerStateToModel();
+            } else {
+                background(0, 0);
+                preparePrimarySoundballGraphics();
+                prepareSecondarySoundballGraphics();
+                prepareTertiarySoundballGraphics();
+                image(tertiarySoundballGraphics, 0, 0, width, height);
+                saveFrame("data/recordings/RAWM/RAWM-recorded-image-#######.png");
 
-        preparePrimarySoundballGraphics();
-        prepareSecondarySoundballGraphics();
-        prepareTertiarySoundballGraphics();
+                float progressBarWidth = abModel.getRecordedSnapshotProgress() * width;
 
-        image(tertiarySoundballGraphics, 0, 0, width, height);
+                fill(255);
+                noStroke();
+                rectMode(CORNER);
+                rect(0, height/2 - 20, progressBarWidth, 40);
+            }
+        } else {
+            blendMode(NORMAL);
+            boolean whiteMode = abModel.isWhiteModeActivated();
+            if (whiteMode) background(255, 255);
+            else background(0, 255);
+            getModel().applyControllerStateToModel();
+
+            preparePrimarySoundballGraphics();
+            prepareSecondarySoundballGraphics();
+            prepareTertiarySoundballGraphics();
 
 
-
+        }
     }
 
     public static void main(String[] args){

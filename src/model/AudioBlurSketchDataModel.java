@@ -3,15 +3,17 @@ package model;
 import controller.SketchController;
 import datatypes.shape.MovingShape;
 import ddf.minim.AudioInput;
+import ddf.minim.AudioPlayer;
+import ddf.minim.AudioSource;
 import ddf.minim.Minim;
 import ddf.minim.analysis.FFT;
 import display.Color;
 import display.ColorSpectrum;
 import processing.core.PApplet;
 import processing.core.PGraphics;
-import sketch.AudioBlurSketch;
 import sketch.Sketch;
 import special.audioblur.FFTHelper;
+import special.audioblur.FFTSample;
 import special.audioblur.SoundBall;
 import special.audioblur.AudioBlurDisplayString;
 
@@ -70,17 +72,21 @@ public class AudioBlurSketchDataModel extends SketchDataModel {
     private int spectrumIndex = 0;
 
     private static final float VOLUME_MULTIPLIER_INC_AMOUNT = 1f;
-    private static final int START_SOUNDBALL_COUNT = 400;
+    private static final int START_SOUNDBALL_COUNT = 2000;
     private static final int SOUNDBALL_NUM_INC_AMOUNT = 20;
     private Set<Character> newKeysPressed, newKeysReleased;
     private Set<Integer> newKeyCodesPressed, newKeyCodesReleased;
     private Minim minim;
-    private AudioInput in;
+    private AudioSource source;
     private FFT fft;
     private FFTHelper fftHelper;
     private Set<SoundBall> soundBalls;
     private ArrayList<SoundBall> soundBallList;
-    private float volumeMultiplier = 100;
+
+    private ArrayList<FFTSample> recordingSnapshots = new ArrayList<>();
+    private int totalSnapshotsRecorded = 0;
+
+    private float volumeMultiplier = 1.5f;
     private float amplitudeCutoff = 0.15f;
     private float primarySoundballGraphicsImageAlpha = 100;
     private float secondarySoundballGraphicsClearAlpha = 5;
@@ -88,8 +94,11 @@ public class AudioBlurSketchDataModel extends SketchDataModel {
     private boolean useVariableAlphaBuffers = false;
     private boolean whiteMode = false;
     private boolean paused = false;
-    private boolean fastBlur = true;
+    private boolean fastBlur = false;
     private boolean bloom = true;
+
+    public boolean recordingMode = true;
+    public boolean recordingFinished = false;
 
     private MovingShape.MotionDrawMode motionDrawMode = MovingShape.MotionDrawMode.BLUR;
 
@@ -102,11 +111,26 @@ public class AudioBlurSketchDataModel extends SketchDataModel {
 
         minim = new Minim(sketch);
 
-        in = minim.getLineIn();
-        in.enableMonitoring();
-        fft = new FFT(in.bufferSize(), in.sampleRate());
-        in.mute();
-        fftHelper = new FFTHelper(fft, this, colorSpectrums.get(spectrumIndex), 0, .6f);
+
+        //source = minim.getLineIn();
+        if(recordingMode){
+            AudioPlayer player = minim.loadFile("model/data/input/Carly Rae Jepsen - Run Away With Me.mp3");
+            player.play();
+            source = player;
+        } else {
+            AudioPlayer player = minim.loadFile("model/data/input/Carly Rae Jepsen - Run Away With Me.mp3");
+            player.play();
+            source = player;
+            /*
+            AudioInput input = minim.getLineIn();
+            input.enableMonitoring();
+            input.mute();
+            source = input;*/
+        }
+
+        fft = new FFT(source.bufferSize(), source.sampleRate());
+
+        fftHelper = new FFTHelper(fft, this, colorSpectrums.get(spectrumIndex), .1f, .5f);
 
         soundBalls = new TreeSet<>(new Comparator<SoundBall>() {
             @Override
@@ -277,22 +301,50 @@ public class AudioBlurSketchDataModel extends SketchDataModel {
         canvas.noStroke();
 
         for(int i = 0; i < fftHelper.getNumBands(); i++){
-            float currFreq = fftHelper.getBand(i);
+            float currFreq = fftHelper.getCurrentSample().getBand(i);
             canvas.rect(rectStart, canvas.height/2 - currFreq * (height/2), rectWidth, currFreq * height);
             rectStart += rectWidth;
         }
     }
 
+    public float getRecordedSnapshotProgress(){
+        float snapshotsProcessed = totalSnapshotsRecorded - recordingSnapshots.size();
+        return snapshotsProcessed/((float) totalSnapshotsRecorded);
+    }
+
     @Override
     public void applyModelStateToSketch(PGraphics canvas, Color.ColorMode colorMode) {
-        if(whiteMode) canvas.background(255, 0);
-        else canvas.background(0, 0);
-        fft.forward(in.mix.toArray());
-        fftHelper.update();
+        if (whiteMode) canvas.background(255, 0);
+        //else canvas.background(0, 0);
 
-        for(SoundBall soundBall : soundBalls){
-            soundBall.update();
-            soundBall.draw(canvas, colorMode, motionDrawMode);
+        if(recordingMode){
+            if(!recordingFinished){
+                if(!((AudioPlayer) source).isPlaying()){
+                    recordingFinished = true;
+                } else {
+                    fft.forward(source.mix.toArray());
+                    fftHelper.update();
+                    recordingSnapshots.add(fftHelper.getCurrentSample());
+                    totalSnapshotsRecorded++;
+                }
+            } else {
+                FFTSample currentSample = recordingSnapshots.remove(0);
+
+                for (SoundBall soundBall : soundBalls) {
+                    soundBall.update(currentSample);
+                    soundBall.draw(canvas, colorMode, motionDrawMode);
+                }
+            }
+        } else {
+
+            fft.forward(source.mix.toArray());
+            fftHelper.update();
+            FFTSample currentSample = fftHelper.getCurrentSample();
+
+            for (SoundBall soundBall : soundBalls) {
+                soundBall.update(currentSample);
+                soundBall.draw(canvas, colorMode, motionDrawMode);
+            }
         }
     }
 }

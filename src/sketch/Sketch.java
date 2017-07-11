@@ -26,7 +26,7 @@ public abstract class Sketch extends PApplet {
 
     private DisplayStringColumn diagInfoColumn = new DisplayStringColumn(new ArrayList<>());
 
-    private boolean showDiagInfo = true;
+    private boolean showDiagInfo = false;
     private int frameCount = 0;
     private int maxFrameCount = 60;
 

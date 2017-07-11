@@ -25,16 +25,16 @@ public class SoundBall {
     private static final float MIN_BOTTOM_ROTATION_SPEED = PI/512;
     private static final float MAX_BOTTOM_ROTATION_SPEED = PI/128;
     private static final float RANDOM_BOTTOM_ROTATION_SPEED_AMOUNT = PI/256;
-    private static final float MIN_BOTTOM_Z = 0;
-    private static final float MAX_BOTTOM_Z = 50;
+    private static final float MIN_BOTTOM_Z = 1;
+    private static final float MAX_BOTTOM_Z = 75;
     private static final float RANDOM_Z_AMOUNT = 0;
-    private static final float MIN_RADIUS = 3f;
-    private static final float MAX_RADIUS = 15;
-    private static final float RANDOM_RADIUS_AMOUNT = 0.5f;
-    private static final float VZ_MULTIPLIER = .025f;
-    private static final float MIN_Z_GRAVITY = 1f;
-    private static final float Z_GRAVITY_MULTIPLIER = 25f;
-    private static final float Z_MULTIPLIER = 2f;
+    private static final float MIN_RADIUS = 5f;
+    private static final float MAX_RADIUS = 40;
+    private static final float RANDOM_RADIUS_AMOUNT = 2f;
+    private static final float VZ_MULTIPLIER = .125f;
+    private static final float MIN_Z_GRAVITY = 0.75f;
+    private static final float Z_GRAVITY_MULTIPLIER = 40f;
+    private static final float Z_MULTIPLIER = 4f;
     private static final float BAND_RATIO_PHYSICS_PERCENTAGE = 0.4f;
 
     public static SoundBall generateRandomSoundBall(FFTHelper fftHelper){
@@ -42,16 +42,16 @@ public class SoundBall {
         return new SoundBall(fftHelper, band);
     }
 
-    private FFTHelper fftHelper;
+    private FFTSample fftSample;
     private float band;
     private float bandRatio, bandAmplitudeRatio, radius, rotation, bottomRotationSpeed,
             minZ, z, vz, prevX, prevY, prevZ;
     private Color bandColor;
 
     public SoundBall(FFTHelper fftHelper, float band){
-        this.fftHelper = fftHelper;
+        fftSample = fftHelper.getCurrentSample();
         this.band = band;
-        bandRatio = ((float) band) / ((float) fftHelper.getNumBands());
+        bandRatio = band / ((float) fftHelper.getNumBands());
 
         bottomRotationSpeed = MIN_BOTTOM_ROTATION_SPEED + randomFloat() * bandRatio * (MAX_BOTTOM_ROTATION_SPEED - MIN_BOTTOM_ROTATION_SPEED);
         bottomRotationSpeed += bandRatio * randomFloat(RANDOM_BOTTOM_ROTATION_SPEED_AMOUNT);
@@ -74,20 +74,20 @@ public class SoundBall {
         radius = MIN_RADIUS + (1 - bandRatio) * (MAX_RADIUS - MIN_RADIUS);
         radius += (1 - bandRatio) * randomFloat() * RANDOM_RADIUS_AMOUNT;
 
-        bandColor = fftHelper.getColorForBand(band);
+        bandColor = fftSample.getColorForBand(band);
     }
 
     public float getX(){
-        return fftHelper.getModel().getSketch().width/2 - cos(rotation) * z * Z_MULTIPLIER;
+        return fftSample.getModel().getSketch().width/2 - cos(rotation) * z * Z_MULTIPLIER;
     }
 
     public float getY(){
-        return fftHelper.getModel().getSketch().height/2 - sin(rotation) * z * Z_MULTIPLIER;
+        return fftSample.getModel().getSketch().height/2 - sin(rotation) * z * Z_MULTIPLIER;
     }
 
     public void updateZ() {
         float newZ = minZ +
-                randomFloat(0.99f, 1.01f) * (PApplet.pow(fftHelper.getVolumeMultipliedBand(band)/2, 0.8f) *
+                randomFloat(0.99f, 1.01f) * (PApplet.pow(fftSample.getVolumeMultipliedBand(band)/2, 0.8f) *
                         ((1 - BAND_RATIO_PHYSICS_PERCENTAGE) + bandRatio * BAND_RATIO_PHYSICS_PERCENTAGE)
                         * 400)/(PApplet.sqrt(z));
         vz -= MIN_Z_GRAVITY + Z_GRAVITY_MULTIPLIER * ((1 - BAND_RATIO_PHYSICS_PERCENTAGE) + bandRatio *
@@ -114,19 +114,20 @@ public class SoundBall {
         return radius;
     }
 
-    public void update(){
+    public void update(FFTSample newSample){
+        fftSample = newSample;
         prevX = getX();
         prevY = getY();
-        prevZ = PApplet.dist(fftHelper.getModel().getSketch().width/2, fftHelper.getModel().getSketch().height/2, prevX, prevY);
+        prevZ = PApplet.dist(fftSample.getModel().getSketch().width/2, fftSample.getModel().getSketch().height/2, prevX, prevY);
         updateZ();
-        bandColor = fftHelper.getColorForBand(band);
+        bandColor = fftSample.getColorForBand(band);
         rotation += bottomRotationSpeed + 2f * bottomRotationSpeed * PApplet.sqrt(z/minZ);
     }
 
     public void draw(PGraphics canvas, Color.ColorMode colorMode, MovingShape.MotionDrawMode motionDrawMode){
         float x = getX(), y = getY();
         float travelDist = PApplet.dist(prevX, prevY, x, y);
-        if(motionDrawMode == MovingShape.MotionDrawMode.BLUR && travelDist > radius * 4 && fftHelper.getModel().isFastBlurEnabled()){
+        if(motionDrawMode == MovingShape.MotionDrawMode.BLUR && travelDist > radius * 4 && fftSample.getModel().isFastBlurEnabled()){
             canvas.blendMode(NORMAL);
             canvas.stroke(
                     bandColor.multiplyAlpha(

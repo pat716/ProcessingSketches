@@ -1,7 +1,6 @@
 package special.audioblur;
 
 import ddf.minim.analysis.FFT;
-import display.Color;
 import display.ColorSpectrum;
 import model.AudioBlurSketchDataModel;
 import processing.core.PApplet;
@@ -13,23 +12,26 @@ import java.util.ArrayList;
  */
 public class FFTHelper {
     private FFTSample currentSample;
-    private FFT fft;
+    private FFT fftCenter, fftLeft, fftRight;
     private AudioBlurSketchDataModel model;
     //private ArrayList<Float> bands;
     //private float maxAmplitude = 0;
     private ColorSpectrum colorSpectrum;
     private int firstBand, lastBand;
 
-    public FFTHelper(FFT fft, AudioBlurSketchDataModel model, ColorSpectrum colorSpectrum, float lowerCutoffPercentage,
+    public FFTHelper(FFT fftCenter, FFT fftLeft, FFT fftRight, AudioBlurSketchDataModel model,
+                     ColorSpectrum colorSpectrum, float lowerCutoffPercentage,
                      float upperCutoffPercentage){
         this.colorSpectrum = colorSpectrum;
         //bands = new ArrayList<>();
 
         this.model = model;
-        this.fft = fft;
-        firstBand = PApplet.floor(((float) fft.specSize()) * lowerCutoffPercentage);
-        lastBand = PApplet.ceil(fft.specSize() - ((float) fft.specSize()) * upperCutoffPercentage);
-        currentSample = new FFTSample(new ArrayList<>(), colorSpectrum, model, 0, firstBand, lastBand);
+        this.fftCenter = fftCenter;
+        this.fftLeft = fftLeft;
+        this.fftRight = fftRight;
+        firstBand = PApplet.floor(((float) fftCenter.specSize()) * lowerCutoffPercentage);
+        lastBand = PApplet.ceil(fftCenter.specSize() - ((float) fftCenter.specSize()) * upperCutoffPercentage);
+        currentSample = new FFTSample(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), colorSpectrum, model, 0, firstBand, lastBand);
         update();
     }
 
@@ -58,16 +60,27 @@ public class FFTHelper {
     }
 
     public void update(){
-        ArrayList<Float> bands = new ArrayList<>();
+        ArrayList<Float> centerBands = new ArrayList<>(), leftBands = new ArrayList<>(), rightBands = new ArrayList<>();
         float maxAmplitude = 0;
-        bands.clear();
         for(int i = firstBand; i < lastBand; i++){
-            float currFreq = fft.getBand(i) - model.getAmplitudeCutoff();
-            bands.add(currFreq);
+            float currFreq = fftCenter.getBand(i) - model.getAmplitudeCutoff();
+            centerBands.add(currFreq);
+            if(currFreq > maxAmplitude){
+                maxAmplitude = currFreq;
+            }
+
+            currFreq = fftLeft.getBand(i) - model.getAmplitudeCutoff();
+            leftBands.add(currFreq);
+            if(currFreq > maxAmplitude){
+                maxAmplitude = currFreq;
+            }
+
+            currFreq = fftRight.getBand(i) - model.getAmplitudeCutoff();
+            rightBands.add(currFreq);
             if(currFreq > maxAmplitude){
                 maxAmplitude = currFreq;
             }
         }
-        currentSample = new FFTSample(bands, colorSpectrum, model, maxAmplitude, firstBand, lastBand);
+        currentSample = new FFTSample(centerBands, leftBands, rightBands, colorSpectrum, model, maxAmplitude, firstBand, lastBand);
     }
 }

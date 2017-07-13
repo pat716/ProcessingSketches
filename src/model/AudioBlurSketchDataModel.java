@@ -11,6 +11,7 @@ import display.Color;
 import display.ColorSpectrum;
 import processing.core.PApplet;
 import processing.core.PGraphics;
+import sketch.AudioBlurSketch;
 import sketch.Sketch;
 import special.audioblur.FFTHelper;
 import special.audioblur.FFTSample;
@@ -26,6 +27,7 @@ import static processing.core.PConstants.*;
  */
 public class AudioBlurSketchDataModel extends SketchDataModel {
     private static final Color BLACK = new Color(0, 1),
+            WHITE = new Color(255, 255, 255, 255),
             PURPLE = new Color(150, 10, 255, 255),
             BLUE = new Color(10, 50, 255, 255),
             GREEN = new Color(60, 255, 10, 255),
@@ -35,12 +37,12 @@ public class AudioBlurSketchDataModel extends SketchDataModel {
 
     private static final ColorSpectrum RAINBOW = new ColorSpectrum(
             Arrays.asList(
-                    new AbstractMap.SimpleEntry<Float, Color>(0.5f, BLACK),
-                    new AbstractMap.SimpleEntry<Float, Color>(2f, PURPLE),
-                    new AbstractMap.SimpleEntry<Float, Color>(3f, BLUE),
-                    new AbstractMap.SimpleEntry<Float, Color>(5f, GREEN),
-                    new AbstractMap.SimpleEntry<Float, Color>(3f, YELLOW),
-                    new AbstractMap.SimpleEntry<Float, Color>(3f, ORANGE)
+
+                    new AbstractMap.SimpleEntry<Float, Color>(5f, PURPLE),
+                    new AbstractMap.SimpleEntry<Float, Color>(4f, BLUE),
+                    new AbstractMap.SimpleEntry<Float, Color>(3f, GREEN),
+                    new AbstractMap.SimpleEntry<Float, Color>(4f, YELLOW),
+                    new AbstractMap.SimpleEntry<Float, Color>(5f, ORANGE)
             ),
             RED
     );
@@ -63,22 +65,95 @@ public class AudioBlurSketchDataModel extends SketchDataModel {
             PURPLE
     );
 
+    private static final ColorSpectrum WXT = new ColorSpectrum(
+            Arrays.asList(
+                    new AbstractMap.SimpleEntry<Float, Color>(1f, BLUE),
+                    new AbstractMap.SimpleEntry<Float, Color>(2f, WHITE),
+                    new AbstractMap.SimpleEntry<Float, Color>(4f, ORANGE),
+                    new AbstractMap.SimpleEntry<Float, Color>(2f, RED)
+            ),
+            WHITE
+    );
+
+    private static final ColorSpectrum FEVER = new ColorSpectrum(
+            Arrays.asList(
+                    new AbstractMap.SimpleEntry<Float, Color>(2f, RED),
+                    new AbstractMap.SimpleEntry<Float, Color>(6f, PURPLE),
+                    new AbstractMap.SimpleEntry<Float, Color>(5f, BLUE),
+                    new AbstractMap.SimpleEntry<Float, Color>(2f, GREEN),
+                    new AbstractMap.SimpleEntry<Float, Color>(0.5f, YELLOW)
+            ),
+            WHITE
+    );
+
     private static final List<ColorSpectrum> colorSpectrums = Arrays.asList(
             RAINBOW,
             HOT,
-            COOL
+            COOL,
+            WXT,
+            FEVER
     );
 
     private int spectrumIndex = 0;
 
-    private static final float VOLUME_MULTIPLIER_INC_AMOUNT = 1f;
-    private static final int START_SOUNDBALL_COUNT = 2000;
+    private static int startSoundballCount = 1200;
+    public static final String RAWM_FILENAME = "model/data/input/Carly Rae Jepsen - Run Away With Me.mp3";
+    public static final String TYB_FILENAME = "model/data/input/Glassjaw - Tip Your Bartender.mp3";
+    public static final String FEVER_FILENAME = "model/data/input/Carly Rae Jepsen - Fever.mp3";
+    public static String mp3FileName = RAWM_FILENAME;
+
+    public void applySketchModeSettings(AudioBlurSketch.AudioBlurSketchMode mode){
+        switch (mode){
+            case REALTIME_MIC:
+            case REALTIME_MP3:
+                recordingMode = false;
+                bloom = false;
+                fastBlur = true;
+                startSoundballCount = 400;
+                SoundBall.maxBottomZ = 30;
+                SoundBall.minRadius = 1;
+                SoundBall.maxRadius = 12;
+                SoundBall.randomRadiusAmount = 1;
+                SoundBall.zMultiplier = 2;
+                break;
+            case RECORD:
+                recordingMode = true;
+                bloom = true;
+                fastBlur = false;
+                startSoundballCount = 1500;
+                SoundBall.maxBottomZ = 40;
+                SoundBall.minRadius = 3;
+                SoundBall.maxRadius = 30;
+                SoundBall.randomRadiusAmount = 2;
+                SoundBall.zMultiplier = 4;
+                break;
+            case RECORD_TEST:
+                recordingMode = false;
+                bloom = false;
+                fastBlur = true;
+                startSoundballCount = 200;
+                SoundBall.maxBottomZ = 40;
+                SoundBall.minRadius = 3;
+                SoundBall.maxRadius = 30;
+                SoundBall.randomRadiusAmount = 2;
+                SoundBall.zMultiplier = 4;
+                motionDrawMode = MovingShape.MotionDrawMode.START;
+                break;
+        }
+    }
+
+
+
+    private static final float VOLUME_MULTIPLIER_INC_AMOUNT = 0.1f;
     private static final int SOUNDBALL_NUM_INC_AMOUNT = 20;
+
     private Set<Character> newKeysPressed, newKeysReleased;
     private Set<Integer> newKeyCodesPressed, newKeyCodesReleased;
     private Minim minim;
+    private AudioPlayer player;
+    private AudioInput input;
     private AudioSource source;
-    private FFT fft;
+    private FFT fftCenter, fftLeft, fftRight;
     private FFTHelper fftHelper;
     private Set<SoundBall> soundBalls;
     private ArrayList<SoundBall> soundBallList;
@@ -86,7 +161,7 @@ public class AudioBlurSketchDataModel extends SketchDataModel {
     private ArrayList<FFTSample> recordingSnapshots = new ArrayList<>();
     private int totalSnapshotsRecorded = 0;
 
-    private float volumeMultiplier = 1.5f;
+    private float volumeMultiplier = 1.6f;
     private float amplitudeCutoff = 0.15f;
     private float primarySoundballGraphicsImageAlpha = 100;
     private float secondarySoundballGraphicsClearAlpha = 5;
@@ -96,52 +171,58 @@ public class AudioBlurSketchDataModel extends SketchDataModel {
     private boolean paused = false;
     private boolean fastBlur = false;
     private boolean bloom = true;
+    private boolean lowestBandsOnTop = false;
 
     public boolean recordingMode = true;
+    public float recordingFrameRate = 24;
     public boolean recordingFinished = false;
+    public boolean snapshotRenderingFinished = false;
 
     private MovingShape.MotionDrawMode motionDrawMode = MovingShape.MotionDrawMode.BLUR;
 
-    public AudioBlurSketchDataModel(SketchController controller, Sketch sketch){
+    private Comparator<SoundBall> soundBallComparator = new Comparator<SoundBall>() {
+        @Override
+        public int compare(SoundBall o1, SoundBall o2) {
+            if (o1.getRadius() > o2.getRadius()) return 1;
+            else if (o1.getRadius() < o2.getRadius()) return -1;
+            return 0;
+        }
+    };
+
+    public AudioBlurSketchDataModel(SketchController controller, Sketch sketch, AudioBlurSketch.AudioBlurSketchMode mode){
         super(controller, sketch);
         newKeysPressed = new HashSet<>();
         newKeysReleased = new HashSet<>();
         newKeyCodesPressed = new HashSet<>();
         newKeyCodesReleased = new HashSet<>();
 
+        applySketchModeSettings(mode);
         minim = new Minim(sketch);
 
+        input = minim.getLineIn();
+        player = minim.loadFile(mp3FileName);
 
-        //source = minim.getLineIn();
-        if(recordingMode){
-            AudioPlayer player = minim.loadFile("model/data/input/Carly Rae Jepsen - Run Away With Me.mp3");
+        if(mode == AudioBlurSketch.AudioBlurSketchMode.REALTIME_MP3 ||
+                mode == AudioBlurSketch.AudioBlurSketchMode.RECORD ||
+                mode == AudioBlurSketch.AudioBlurSketchMode.RECORD_TEST ||
+                input == null){
             player.play();
             source = player;
         } else {
-            AudioPlayer player = minim.loadFile("model/data/input/Carly Rae Jepsen - Run Away With Me.mp3");
-            player.play();
-            source = player;
-            /*
-            AudioInput input = minim.getLineIn();
             input.enableMonitoring();
             input.mute();
-            source = input;*/
+            source = input;
         }
 
-        fft = new FFT(source.bufferSize(), source.sampleRate());
+        fftCenter = new FFT(source.bufferSize(), source.sampleRate());
+        fftLeft = new FFT(source.bufferSize(), source.sampleRate());
+        fftRight = new FFT(source.bufferSize(), source.sampleRate());
 
-        fftHelper = new FFTHelper(fft, this, colorSpectrums.get(spectrumIndex), .1f, .5f);
+        fftHelper = new FFTHelper(fftCenter, fftLeft, fftRight, this, colorSpectrums.get(spectrumIndex), .0f, .5f);
 
-        soundBalls = new TreeSet<>(new Comparator<SoundBall>() {
-            @Override
-            public int compare(SoundBall o1, SoundBall o2) {
-                if(o1.getRadius() > o2.getRadius()) return 1;
-                else if(o1.getRadius() < o2.getRadius()) return -1;
-                return 0;
-            }
-        });
+        soundBalls = new TreeSet<>(soundBallComparator);
         soundBallList = new ArrayList<>();
-        for(int i = 0; i < START_SOUNDBALL_COUNT; i++){
+        for(int i = 0; i < startSoundballCount; i++){
             SoundBall randomSoundBall = SoundBall.generateRandomSoundBall(fftHelper);
             soundBalls.add(randomSoundBall);
             soundBallList.add(randomSoundBall);
@@ -167,6 +248,30 @@ public class AudioBlurSketchDataModel extends SketchDataModel {
                         new Color(1, 1), 16, this));
     }
 
+    public void playSong(String fileName){
+        mp3FileName = fileName;
+        if(source == player){
+            player.close();
+        } else if(source == input && input != null){
+            input.disableMonitoring();
+        }
+
+        player = minim.loadFile(fileName);
+        player.play();
+        source = player;
+
+        if(fileName.equals(FEVER_FILENAME)){
+            spectrumIndex = 4;
+        } else if(fileName.equals(TYB_FILENAME)){
+            spectrumIndex = 3;
+        } else if(fileName.equals(RAWM_FILENAME)){
+            spectrumIndex = 0;
+            //lowestBandsOnTop = true;
+        }
+
+        fftHelper.setColorSpectrum(colorSpectrums.get(spectrumIndex));
+    }
+
     public boolean isPaused() {
         return paused;
     }
@@ -185,6 +290,29 @@ public class AudioBlurSketchDataModel extends SketchDataModel {
 
     public void toggleWhiteMode(){
         whiteMode = !whiteMode;
+    }
+
+    public void toggleSoundballStackingMode(){
+        lowestBandsOnTop = !lowestBandsOnTop;
+
+        Set<SoundBall> newSoundBalls;
+        if(lowestBandsOnTop) newSoundBalls = new TreeSet<>(soundBallComparator);
+        else newSoundBalls = new TreeSet<>(soundBallComparator.reversed());
+        newSoundBalls.addAll(soundBalls);
+        soundBalls = newSoundBalls;
+    }
+
+    public void nextSong(){
+        if(source == player){
+            if(mp3FileName.equals(RAWM_FILENAME)){
+                mp3FileName = TYB_FILENAME;
+            } else if(mp3FileName.equals(TYB_FILENAME)){
+                mp3FileName = FEVER_FILENAME;
+            } else {
+                mp3FileName = RAWM_FILENAME;
+            }
+        }
+        playSong(mp3FileName);
     }
 
     public MovingShape.MotionDrawMode getMotionDrawMode() {
@@ -263,6 +391,10 @@ public class AudioBlurSketchDataModel extends SketchDataModel {
             motionDrawMode = MovingShape.getNextMotionDrawMode(motionDrawMode);
         }
 
+        if(newKeysPressed.contains('n') || newKeysPressed.contains('N')){
+            nextSong();
+        }
+
         if(newKeysPressed.contains('o') || newKeysPressed.contains('O')){
             spectrumIndex = (spectrumIndex + 1) % colorSpectrums.size();
             fftHelper.setColorSpectrum(colorSpectrums.get(spectrumIndex));
@@ -279,6 +411,10 @@ public class AudioBlurSketchDataModel extends SketchDataModel {
                 soundBalls.remove(soundBall);
                 soundBallList.remove(index);
             }
+        }
+
+        if(newKeysPressed.contains('s') || newKeysPressed.contains('S')){
+            toggleSoundballStackingMode();
         }
 
         if(newKeysPressed.contains('w') || newKeysPressed.contains('W')){
@@ -315,34 +451,43 @@ public class AudioBlurSketchDataModel extends SketchDataModel {
     @Override
     public void applyModelStateToSketch(PGraphics canvas, Color.ColorMode colorMode) {
         if (whiteMode) canvas.background(255, 0);
-        //else canvas.background(0, 0);
+        else canvas.background(0, 0);
 
         if(recordingMode){
             if(!recordingFinished){
                 if(!((AudioPlayer) source).isPlaying()){
                     recordingFinished = true;
+                    getSketch().resetFrameCount();
                 } else {
-                    fft.forward(source.mix.toArray());
+                    fftCenter.forward(source.mix.toArray());
+                    fftLeft.forward(source.left.toArray());
+                    fftRight.forward(source.right.toArray());
                     fftHelper.update();
                     recordingSnapshots.add(fftHelper.getCurrentSample());
                     totalSnapshotsRecorded++;
                 }
             } else {
+                if(snapshotRenderingFinished || recordingSnapshots.size() == 0){
+                    snapshotRenderingFinished = true;
+                    return;
+                }
                 FFTSample currentSample = recordingSnapshots.remove(0);
 
                 for (SoundBall soundBall : soundBalls) {
-                    soundBall.update(currentSample);
+                    soundBall.update(currentSample, recordingFrameRate);
                     soundBall.draw(canvas, colorMode, motionDrawMode);
                 }
             }
         } else {
 
-            fft.forward(source.mix.toArray());
+            fftCenter.forward(source.mix.toArray());
+            fftLeft.forward(source.left.toArray());
+            fftRight.forward(source.right.toArray());
             fftHelper.update();
             FFTSample currentSample = fftHelper.getCurrentSample();
 
             for (SoundBall soundBall : soundBalls) {
-                soundBall.update(currentSample);
+                soundBall.update(currentSample, getSketch().frameRate);
                 soundBall.draw(canvas, colorMode, motionDrawMode);
             }
         }

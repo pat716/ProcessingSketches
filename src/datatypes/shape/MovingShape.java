@@ -14,7 +14,7 @@ public class MovingShape {
         if(distance <= 1){
             return 1;
         }
-        return PApplet.min(1, PApplet.max(0, 0.05f + 1/PApplet.pow(distance, 0.9f)));
+        return PApplet.min(1, PApplet.max(0, 0.02f + 1/PApplet.pow(distance, 0.6f)));
     }
 
     public static enum MotionDrawMode{

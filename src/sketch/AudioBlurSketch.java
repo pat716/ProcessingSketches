@@ -17,13 +17,19 @@ import java.util.Map;
  * Created by psweeney on 2/28/17.
  */
 public class AudioBlurSketch extends Sketch {
+    public enum AudioBlurSketchMode{
+        REALTIME_MP3, REALTIME_MIC, RECORD, RECORD_TEST
+    }
+
+    public static AudioBlurSketchMode startMode = AudioBlurSketchMode.RECORD;
+
     PGraphics primarySoundballGraphics;
     PGraphics secondarySoundballGraphics;
     PGraphics tertiarySoundballGraphics;
     PGraphics bloomGraphics;
 
-    private static int SOUND_BALL_BLEND_MODE = LIGHTEST;
-    private static float bloomGraphicsSizeFactor = 1f;
+    private static int SOUND_BALL_BLEND_MODE = NORMAL;
+    private static float bloomGraphicsSizeFactor = 0.5f;
 
     private AudioBlurSketchDataModel abModel;
 
@@ -35,15 +41,26 @@ public class AudioBlurSketch extends Sketch {
         SOUND_BALL_BLEND_MODE = soundBallBlendMode;
     }
 
+    public AudioBlurSketchMode sketchMode = AudioBlurSketchMode.REALTIME_MP3;
+
     @Override
     public void sketchSettings() {
-        size(1920, 1080);
-        fullScreen();
+        if(startMode == AudioBlurSketchMode.REALTIME_MP3 || startMode == AudioBlurSketchMode.REALTIME_MIC){
+            size(800, 600);
+        } else {
+            size(1920, 1080);
+        }
+        //fullScreen();
     }
 
     @Override
     public void sketchSetup() {
-        abModel = new AudioBlurSketchDataModel(new SketchController(), this);
+        if(startMode == AudioBlurSketchMode.RECORD || startMode == AudioBlurSketchMode.RECORD_TEST) {
+            frameRate(24);
+        } else {
+            frameRate(60);
+        }
+        abModel = new AudioBlurSketchDataModel(new SketchController(), this, startMode);
         setModel(abModel);
         ellipseMode(CENTER);
         rectMode(CENTER);
@@ -129,33 +146,54 @@ public class AudioBlurSketch extends Sketch {
         tertiarySoundballGraphics.image(secondarySoundballGraphics.get(), 0, 0, tertiarySoundballGraphics.width, tertiarySoundballGraphics.height);
         if(!whiteMode && abModel.isBloomEnabled()){
             bloomGraphics.beginDraw();
-            bloomGraphics.fill(0, 100);
+            bloomGraphics.fill(0, 230);
             bloomGraphics.rect(0, 0, bloomGraphics.width, bloomGraphics.height);
             //bloomGraphics.background(0, 0);
             bloomGraphics.image(secondarySoundballGraphics.get(), 0, 0, bloomGraphics.width, bloomGraphics.height);
             bloomGraphics.endDraw();
-            bloomGraphics.filter(PConstants.BLUR, 8f);
+            bloomGraphics.filter(PConstants.BLUR, 16f);
             tertiarySoundballGraphics.blendMode(ADD);
             tertiarySoundballGraphics.image(bloomGraphics, 0, 0, width, height);
         }
         tertiarySoundballGraphics.endDraw();
     }
 
-
-
+    int lastFrameRendered = 0;
     @Override
     public void sketchDraw() {
         getModel().applyControllerStateToModel();
         if(abModel.recordingMode){
             if(!abModel.recordingFinished){
-                abModel.applyControllerStateToModel();
+                abModel.applyModelStateToSketch(primarySoundballGraphics, COLOR_MODE);
             } else {
+                if(abModel.snapshotRenderingFinished){
+                    if(AudioBlurSketchDataModel.mp3FileName.equals(AudioBlurSketchDataModel.RAWM_FILENAME) ||
+                                AudioBlurSketchDataModel.mp3FileName.equals(AudioBlurSketchDataModel.TYB_FILENAME)){
+                        abModel.recordingFinished = false;
+                        abModel.snapshotRenderingFinished = false;
+                        abModel.nextSong();
+                    } else {
+                        exit();
+                    }
+                } else if(abModel.isPaused()){
+                    frameCount = lastFrameRendered;
+                    return;
+                }
+
                 background(0, 0);
                 preparePrimarySoundballGraphics();
                 prepareSecondarySoundballGraphics();
                 prepareTertiarySoundballGraphics();
                 image(tertiarySoundballGraphics, 0, 0, width, height);
-                saveFrame("data/recordings/RAWM/RAWM-recorded-image-#######.png");
+                if(AudioBlurSketchDataModel.mp3FileName.equals(AudioBlurSketchDataModel.RAWM_FILENAME)) {
+                    saveFrame("data/recordings/RAWM/RAWM-recorded-image-#######.png");
+                } else if(AudioBlurSketchDataModel.mp3FileName.equals(AudioBlurSketchDataModel.TYB_FILENAME)){
+                    saveFrame("data/recordings/TYB/TYB-recorded-image-#######.png");
+                } else if(AudioBlurSketchDataModel.mp3FileName.equals(AudioBlurSketchDataModel.FEVER_FILENAME)){
+                    saveFrame("data/recordings/FEVER/FEVER-recorded-image-#######.png");
+                }
+
+                lastFrameRendered = frameCount;
 
                 float progressBarWidth = abModel.getRecordedSnapshotProgress() * width;
 
@@ -175,7 +213,7 @@ public class AudioBlurSketch extends Sketch {
             prepareSecondarySoundballGraphics();
             prepareTertiarySoundballGraphics();
 
-
+            image(tertiarySoundballGraphics, 0, 0, width, height);
         }
     }
 

@@ -10,9 +10,7 @@ import processing.core.PApplet;
 import processing.core.PGraphics;
 import sketch.AudioBlurSketch;
 
-import static processing.core.PApplet.min;
-import static processing.core.PApplet.cos;
-import static processing.core.PApplet.sin;
+import static processing.core.PApplet.*;
 import static processing.core.PConstants.NORMAL;
 import static processing.core.PConstants.PI;
 import static processing.core.PConstants.TWO_PI;
@@ -22,23 +20,25 @@ import static sketch.Sketch.randomFloat;
  * Created by psweeney on 6/12/17.
  */
 public class SoundBall {
-    private static final float MIN_BOTTOM_ROTATION_SPEED = PI/512;
-    private static final float MAX_BOTTOM_ROTATION_SPEED = PI/128;
-    private static final float RANDOM_BOTTOM_ROTATION_SPEED_AMOUNT = PI/256;
-    private static final float MIN_BOTTOM_Z = 1;
-    private static final float MAX_BOTTOM_Z = 75;
-    private static final float RANDOM_Z_AMOUNT = 0;
-    private static final float MIN_RADIUS = 5f;
-    private static final float MAX_RADIUS = 40;
-    private static final float RANDOM_RADIUS_AMOUNT = 2f;
-    private static final float VZ_MULTIPLIER = .125f;
-    private static final float MIN_Z_GRAVITY = 0.75f;
-    private static final float Z_GRAVITY_MULTIPLIER = 40f;
-    private static final float Z_MULTIPLIER = 4f;
-    private static final float BAND_RATIO_PHYSICS_PERCENTAGE = 0.4f;
+    private static final float MIN_BOTTOM_ROTATION_SPEED = PI/2500;
+    private static final float MAX_BOTTOM_ROTATION_SPEED = PI/500;
+    private static final float RANDOM_BOTTOM_ROTATION_SPEED_AMOUNT = PI/1100;
+    private static final float CENTER_BAND_MULTIPLIER = 1f;
+    private static final float RANDOM_Z_AMOUNT = 2;
+    private static final float VZ_MULTIPLIER = .025f;
+    private static final float MIN_Z_GRAVITY = 1f;
+    private static final float Z_GRAVITY_MULTIPLIER = 8f;
+    private static final float BAND_RATIO_PHYSICS_PERCENTAGE = 0.98f;
+
+    public static float minBottomZ = 0;
+    public static float maxBottomZ = 40;
+    public static float minRadius = 3f;
+    public static float maxRadius = 30;
+    public static float randomRadiusAmount = 2f;
+    public static float zMultiplier = 4f;
 
     public static SoundBall generateRandomSoundBall(FFTHelper fftHelper){
-        float band = PApplet.pow(randomFloat(), 1f/3f) * ((float) fftHelper.getNumBands() - 1);
+        float band = PApplet.pow(randomFloat(), 1f/3.0f) * ((float) fftHelper.getNumBands() - 1);
         return new SoundBall(fftHelper, band);
     }
 
@@ -61,7 +61,7 @@ public class SoundBall {
 
         rotation = randomFloat(TWO_PI);
 
-        minZ = MIN_BOTTOM_Z + PApplet.sqrt(bandRatio) * (MAX_BOTTOM_Z - MIN_BOTTOM_Z);
+        minZ = minBottomZ + PApplet.sqrt(bandRatio) * (maxBottomZ - minBottomZ);
         minZ += bandRatio * randomFloat(RANDOM_Z_AMOUNT);
         z = minZ;
         vz = 0;
@@ -71,30 +71,49 @@ public class SoundBall {
         prevZ = minZ;
         rotation += bottomRotationSpeed;
 
-        radius = MIN_RADIUS + (1 - bandRatio) * (MAX_RADIUS - MIN_RADIUS);
-        radius += (1 - bandRatio) * randomFloat() * RANDOM_RADIUS_AMOUNT;
+        radius = minRadius + (1 - bandRatio) * (maxRadius - minRadius);
+        radius += (1 - bandRatio) * randomFloat() * randomRadiusAmount;
 
         bandColor = fftSample.getColorForBand(band);
     }
 
     public float getX(){
-        return fftSample.getModel().getSketch().width/2 - cos(rotation) * z * Z_MULTIPLIER;
+        return fftSample.getModel().getSketch().width/2 - cos(rotation) * z * zMultiplier;
     }
 
     public float getY(){
-        return fftSample.getModel().getSketch().height/2 - sin(rotation) * z * Z_MULTIPLIER;
+        return fftSample.getModel().getSketch().height/2 - sin(rotation) * z * zMultiplier;
     }
 
-    public void updateZ() {
+    public float getBandForPosition(){
+        float boundedRotation = rotation % TWO_PI;
+        float centerBand = fftSample.getVolumeMultipliedBand(band) * CENTER_BAND_MULTIPLIER;
+        if(boundedRotation >= PI/2 && boundedRotation < 3 * PI/2){
+            float rightBand = fftSample.getVolumeMultipliedRightBand(band);
+            float rightRatio = PApplet.max(0, PApplet.min(1,1 - abs(boundedRotation - PI)/(PI/2)));
+            return rightRatio * rightBand + (1 - rightRatio) * centerBand;
+        } else {
+            float leftBand = fftSample.getVolumeMultipliedLeftBand(band);
+            float leftRatio = 1;
+            if(boundedRotation < PI/2){
+                leftRatio = PApplet.max(0, PApplet.min(1, 1 - boundedRotation/(PI/2)));
+            } else {
+                leftRatio = PApplet.max(0, PApplet.min(1, 1 - abs(boundedRotation - TWO_PI)/(PI/2)));
+            }
+            return leftRatio * leftBand + (1 - leftRatio) * centerBand;
+        }
+    }
+
+    public void updateZ(float zMultiplier) {
         float newZ = minZ +
-                randomFloat(0.99f, 1.01f) * (PApplet.pow(fftSample.getVolumeMultipliedBand(band)/2, 0.8f) *
+                (randomFloat(0.999f, 1.001f) * (PApplet.pow(getBandForPosition()/2, 0.8f) *
                         ((1 - BAND_RATIO_PHYSICS_PERCENTAGE) + bandRatio * BAND_RATIO_PHYSICS_PERCENTAGE)
-                        * 400)/(PApplet.sqrt(z));
-        vz -= MIN_Z_GRAVITY + Z_GRAVITY_MULTIPLIER * ((1 - BAND_RATIO_PHYSICS_PERCENTAGE) + bandRatio *
-                BAND_RATIO_PHYSICS_PERCENTAGE);
+                        * 400)/(PApplet.sqrt(z))) * zMultiplier;
+        vz -= MIN_Z_GRAVITY * zMultiplier + (Z_GRAVITY_MULTIPLIER * ((1 - BAND_RATIO_PHYSICS_PERCENTAGE) + bandRatio *
+                BAND_RATIO_PHYSICS_PERCENTAGE)) * zMultiplier;
         if(newZ > z){
-            float vz_addition = (newZ - z) * VZ_MULTIPLIER * (0.2f + PApplet.pow((1 - BAND_RATIO_PHYSICS_PERCENTAGE)
-                    + bandRatio * BAND_RATIO_PHYSICS_PERCENTAGE, 2));
+            float vz_addition = ((newZ - z) * VZ_MULTIPLIER * (0.2f + PApplet.pow((1 - BAND_RATIO_PHYSICS_PERCENTAGE)
+                    + bandRatio * BAND_RATIO_PHYSICS_PERCENTAGE, 2))) * zMultiplier;
             if(vz + vz_addition < vz_addition){
                 vz = vz_addition;
             } else {
@@ -114,14 +133,16 @@ public class SoundBall {
         return radius;
     }
 
-    public void update(FFTSample newSample){
+    public void update(FFTSample newSample, float frameRate){
+        float frameRateMultiplier = 60/frameRate;
         fftSample = newSample;
         prevX = getX();
         prevY = getY();
         prevZ = PApplet.dist(fftSample.getModel().getSketch().width/2, fftSample.getModel().getSketch().height/2, prevX, prevY);
-        updateZ();
+        rotation += bottomRotationSpeed * frameRateMultiplier + 2f * bottomRotationSpeed * PApplet.sqrt(z/minZ) * frameRateMultiplier;
+        updateZ(frameRateMultiplier);
         bandColor = fftSample.getColorForBand(band);
-        rotation += bottomRotationSpeed + 2f * bottomRotationSpeed * PApplet.sqrt(z/minZ);
+
     }
 
     public void draw(PGraphics canvas, Color.ColorMode colorMode, MovingShape.MotionDrawMode motionDrawMode){

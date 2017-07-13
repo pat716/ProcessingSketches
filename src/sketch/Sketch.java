@@ -27,8 +27,6 @@ public abstract class Sketch extends PApplet {
     private DisplayStringColumn diagInfoColumn = new DisplayStringColumn(new ArrayList<>());
 
     private boolean showDiagInfo = false;
-    private int frameCount = 0;
-    private int maxFrameCount = 60;
 
     public SketchDataModel getModel() {
         return model;
@@ -42,6 +40,7 @@ public abstract class Sketch extends PApplet {
     public final void settings(){
         super.settings();
         sketchSettings();
+        super.frameCount = 0;
     }
 
     @Override
@@ -89,16 +88,12 @@ public abstract class Sketch extends PApplet {
         return DisplayString.getFloatStringForDecimalPlace(frameRate, frameRateDecimalPlace);
     }
 
+    public void resetFrameCount(){
+        frameCount = 0;
+    }
+
     public int getFrameCount() {
         return frameCount;
-    }
-
-    public int getMaxFrameCount() {
-        return maxFrameCount;
-    }
-
-    public void setMaxFrameCount(int maxFrameCount) {
-        this.maxFrameCount = PApplet.max(1, maxFrameCount);
     }
 
     @Override
@@ -115,7 +110,6 @@ public abstract class Sketch extends PApplet {
         if(showDiagInfo){
             diagInfoColumn.draw(getGraphics(), COLOR_MODE, 10, 10, 5);
         }
-        frameCount = (frameCount + 1) % maxFrameCount;
     }
 
     public final void setShowDiagInfo(boolean showDiagInfo){
